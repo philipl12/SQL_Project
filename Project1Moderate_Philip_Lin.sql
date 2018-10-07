@@ -202,4 +202,100 @@ FROM   production.productcosthistory
        INNER JOIN purchasing.purchaseorderdetail
                ON production.productcosthistory.productid =
                   purchasing.purchaseorderdetail.productid
-WHERE  purchasing.purchaseorderdetail.rejectedqty > 100 
+WHERE  purchasing.purchaseorderdetail.rejectedqty > 100
+
+--11
+--show price per piece and round to two decimal discrepancies
+
+USE tsqlv4;
+
+SELECT sales.ordervalues.orderid,
+       sales.ordervalues.qty,
+       sales.ordervalues.val,
+       ( sales.ordervalues.val / sales.ordervalues.qty )AS pricePerPiece,
+       Round(( sales.ordervalues.val / sales.ordervalues.qty ), 2) AS roundedPrice
+FROM   sales.ordervalues
+       INNER JOIN sales.orders
+               ON sales.ordervalues.orderid = sales.orders.orderid
+
+--12
+--find me the all orders placed by Paul Suurs
+
+use tsqlv4;
+SELECT
+   e.firstname,
+   e.lastname,
+   o.shipaddress,
+   o.shipcity,
+   o.shipcountry
+FROM
+   sales.orders AS o
+   INNER JOIN
+      hr.employees AS e
+      ON o.empid = e.empid
+      AND e.empid = 6
+
+--13
+--How many different products do we currently sell
+USE tsqlv4;
+
+SELECT production.products.productname,
+       production.categories.categoryname,
+       production.products.unitprice,
+       production.categories.description
+FROM   production.categories
+       FULL JOIN production.products
+              ON production.categories.categoryid =
+                 production.products.categoryid
+ORDER  BY production.products.productname
+
+--14
+--Find me employees who hold a graduates degree, own a house
+--and make 25000 or less
+
+USE adventureworks2014;
+
+SELECT person.person.firstname,
+       person.person.middlename,
+       person.person.lastname,
+       sales.vpersondemographics.birthdate,
+       sales.vpersondemographics.maritalstatus,
+       sales.vpersondemographics.yearlyincome,
+       sales.vpersondemographics.gender,
+       sales.vpersondemographics.totalchildren,
+       sales.vpersondemographics.education,
+       sales.vpersondemographics.occupation,
+       sales.vpersondemographics.numbercarsowned
+FROM   person.person
+       INNER JOIN sales.vpersondemographics
+               ON person.person.businessentityid =
+                  sales.vpersondemographics.businessentityid
+WHERE  education = 'Graduate Degree'
+       AND homeownerflag = 1
+       AND yearlyincome < '25001'
+
+--15
+--Find everyone making more than 100,000 who aren't management,
+--don't hold a college degree, and own a house
+
+USE adventureworks2014;
+
+SELECT person.person.firstname,
+       person.person.middlename,
+       person.person.lastname,
+       sales.vpersondemographics.birthdate,
+       sales.vpersondemographics.maritalstatus,
+       sales.vpersondemographics.yearlyincome,
+       sales.vpersondemographics.gender,
+       sales.vpersondemographics.totalchildren,
+       sales.vpersondemographics.education,
+       sales.vpersondemographics.occupation,
+       sales.vpersondemographics.numbercarsowned
+FROM   person.person
+       INNER JOIN sales.vpersondemographics
+               ON person.person.businessentityid =
+                  sales.vpersondemographics.businessentityid
+WHERE  education = 'Partial College'
+       AND homeownerflag = 1
+       AND yearlyincome = 'Greater than 100000'
+       AND occupation != 'Management' 

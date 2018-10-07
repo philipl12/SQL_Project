@@ -1,19 +1,12 @@
 --1
---find me the all orders placed by Paul Suurs
+--give a count of different product IDs
 
-use tsqlv4;
-SELECT
-   e.firstname,
-   e.lastname,
-   o.shipaddress,
-   o.shipcity,
-   o.shipcountry
-FROM
-   sales.orders AS o
-   INNER JOIN
-      hr.employees AS e
-      ON o.empid = e.empid
-      AND e.empid = 6
+USE tsqlv4;
+
+SELECT productid,
+       Count(productid) AS totalCount
+FROM   sales.orderdetails
+GROUP  BY productid 
 
 --2
 --I want to save on time and shipping costs
