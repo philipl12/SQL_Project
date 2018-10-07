@@ -116,3 +116,90 @@ WHERE
    discontinued = 1
 ORDER BY
    productname
+
+ --6
+
+USE tsqlv4;
+
+SELECT sales.orders.custid,
+       ( sales.orderdetails.unitprice * sales.orderdetails.qty )   AS
+       totalUnitCost,
+       sales.orders.orderdate,
+       sales.orders.shippeddate,
+       Day(sales.orders.shippeddate) - Day(sales.orders.orderdate) AS
+       processTime
+FROM   sales.customers
+       INNER JOIN sales.orders
+               ON sales.customers.custid = sales.orders.custid
+       INNER JOIN sales.orderdetails
+               ON sales.orders.orderid = sales.orderdetails.orderid
+WHERE  Day(sales.orders.shippeddate) - Day(sales.orders.orderdate) > 20
+
+--7
+
+USE tsqlv4;
+
+SELECT hr.employees.empid,
+       production.products.productname,
+       sales.orderdetails.qty
+FROM   production.products
+       INNER JOIN sales.orderdetails
+               ON production.products.productid = sales.orderdetails.productid
+       INNER JOIN sales.orders
+               ON sales.orderdetails.orderid = sales.orders.orderid
+                  AND sales.orderdetails.orderid = sales.orders.orderid
+                  AND sales.orderdetails.orderid = sales.orders.orderid
+       INNER JOIN hr.employees
+               ON sales.orders.empid = hr.employees.empid
+                  AND sales.orders.empid = hr.employees.empid
+                  AND sales.orders.empid = hr.employees.empid
+WHERE  sales.orderdetails.qty > 100
+ORDER  BY hr.employees.empid
+
+
+--8
+
+USE wideworldimporters;
+
+SELECT purchasing.suppliertransactions.supplierid,
+       purchasing.suppliertransactions.amountexcludingtax,
+       purchasing.suppliertransactions.taxamount,
+       purchasing.suppliertransactions.finalizationdate
+FROM   purchasing.suppliertransactions
+       INNER JOIN purchasing.suppliers
+               ON purchasing.suppliertransactions.supplierid =
+                  purchasing.suppliers.supplierid
+WHERE  purchasing.suppliertransactions.finalizationdate >= '2016-04-01'
+       AND purchasing.suppliertransactions.amountexcludingtax != 0
+ORDER  BY purchasing.suppliertransactions.finalizationdate DESC
+
+--9
+
+USE wideworldimporters;
+
+SELECT warehouse.colors.colorname,
+       Count(warehouse.colors.colorname) AS colorCount
+FROM   warehouse.colors
+       INNER JOIN warehouse.stockitems
+               ON warehouse.colors.colorid = warehouse.stockitems.colorid
+GROUP  BY warehouse.colors.colorname
+
+--10
+
+USE adventureworks2014;
+
+SELECT TOP 10 production.productcosthistory.productid,
+              production.productcosthistory.standardcost,
+              production.productinventory.shelf,
+              production.productinventory.bin,
+              production.productinventory.quantity,
+              purchasing.purchaseorderdetail.receivedqty,
+              purchasing.purchaseorderdetail.rejectedqty
+FROM   production.productcosthistory
+       INNER JOIN production.productinventory
+               ON production.productcosthistory.productid =
+                  production.productinventory.productid
+       INNER JOIN purchasing.purchaseorderdetail
+               ON production.productcosthistory.productid =
+                  purchasing.purchaseorderdetail.productid
+WHERE  purchasing.purchaseorderdetail.rejectedqty > 100 
