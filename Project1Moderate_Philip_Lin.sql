@@ -73,29 +73,18 @@ ORDER BY
 
 
 --4
-use AdventureWorksDW2014;
-SELECT
-   DimReseller.ResellerName,
-   DimReseller.OrderFrequency,
-   DimGeography.StateProvinceName,
-   DimCustomer.FirstName,
-   DimCustomer.LastName,
-   DimCustomer.YearlyIncome
-FROM
-   DimGeography
-   INNER JOIN
-      DimCustomer
-      ON DimGeography.GeographyKey = DimCustomer.GeographyKey
-   INNER JOIN
-      DimReseller
-      ON DimGeography.GeographyKey = DimReseller.GeographyKey
-WHERE
-   yearlyincome > 130000
-   AND OrderFrequency = 'Q'
-   AND DimGeography.CountryRegionCode = 'US'
-ORDER BY
-   YearlyIncome
 
+USE TSQLv4;
+
+SELECT Production.Products.productid
+	,avg(Sales.OrderDetails.qty) AS AvgQtyOrdered
+	,Sales.OrderDetails.unitprice
+	,(Sales.OrderDetails.unitprice * avg(Sales.OrderDetails.qty)) AS AvgPricePerOrder
+FROM Production.Products
+INNER JOIN Sales.OrderDetails ON Production.Products.productid = Sales.OrderDetails.productid
+GROUP BY Production.Products.productid
+	,Sales.OrderDetails.unitprice
+ORDER BY Production.Products.productid
 
 --5
 use TSQLV4;
@@ -298,4 +287,4 @@ FROM   person.person
 WHERE  education = 'Partial College'
        AND homeownerflag = 1
        AND yearlyincome = 'Greater than 100000'
-       AND occupation != 'Management' 
+       AND occupation != 'Management'

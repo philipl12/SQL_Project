@@ -6,7 +6,7 @@ USE tsqlv4;
 SELECT productid,
        Count(productid) AS totalCount
 FROM   sales.orderdetails
-GROUP  BY productid 
+GROUP  BY productid
 
 --2
 --I want to save on time and shipping costs
@@ -81,3 +81,27 @@ FROM
       ON c.custid = o.custid
 WHERE
    o.orderid IS NULL
+
+
+--example of multijoin
+
+use TSQLV4;
+go
+select c.companyname
+     , o.orderid
+     , o.orderdate
+     , p.productname
+     , od.unitprice
+     , od.qty
+     , od.discount
+     , TotalCost           = (od.unitprice * od.qty)
+     , TotalDiscountedCost = (od.unitprice * od.qty) * (1 - od.discount)
+from Sales.Customers               as c
+    inner join Sales.Orders        as o
+        on o.custid = c.custid
+    inner join Sales.OrderDetails  as od
+        on od.orderid = o.orderid
+    inner join Production.Products as p
+        on p.productid = od.productid
+order by c.companyname
+       , o.orderdate;
