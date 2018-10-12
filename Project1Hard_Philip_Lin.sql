@@ -73,3 +73,105 @@ WHERE
    AND DimGeography.CountryRegionCode = 'US'
 ORDER BY
    YearlyIncome
+
+ --5
+ USE TSQLV4
+ GO
+
+ drop function if exists dbo.findCost;
+ go
+
+ CREATE FUNCTION dbo.findCost (
+ 	@currPrice MONEY
+ 	,@qty INT
+ 	)
+ RETURNS MONEY
+ AS
+ BEGIN
+ 	RETURN @currPrice * @qty
+ END
+ GO
+
+SELECT Production.Products.productid
+	,Sales.OrderDetails.orderid
+	,Production.Products.unitprice AS OrderedPrice
+	,Sales.OrderDetails.unitprice AS SoldPrice
+	,Sales.OrderDetails.qty
+	,dbo.findCost(Sales.OrderDetails.qty, Sales.OrderDetails.unitprice) AS customerCost
+	,Sales.Orders.freight
+FROM Production.Products
+INNER JOIN Sales.OrderDetails ON Production.Products.productid = Sales.OrderDetails.productid
+	AND Production.Products.productid = Sales.OrderDetails.productid
+INNER JOIN Sales.Orders ON Sales.OrderDetails.orderid = Sales.Orders.orderid
+	AND Sales.OrderDetails.orderid = Sales.Orders.orderid
+ORDER BY customerCost DESC
+
+--6
+USE TSQLV4
+GO
+
+drop function if exists dbo.findCost;
+go
+
+CREATE FUNCTION dbo.findCost (
+	@wholeSalePrice MONEY
+	,@MSRP MONEY
+	)
+RETURNS MONEY
+AS
+BEGIN
+	RETURN @wholeSalePrice - @MSRP
+END
+GO
+
+SELECT Production.Products.productid
+	,Sales.OrderDetails.orderid
+	,Production.Products.unitprice AS OrderedPrice
+	,Sales.OrderDetails.unitprice AS SoldPrice
+	,dbo.findCost(Production.Products.unitprice, Sales.OrderDetails.unitprice) AS CostDifference
+	,(Sales.OrderDetails.qty * Sales.Orders.freight) AS shippingWeight
+FROM Production.Products
+INNER JOIN Sales.OrderDetails ON Production.Products.productid = Sales.OrderDetails.productid
+	AND Production.Products.productid = Sales.OrderDetails.productid
+INNER JOIN Sales.Orders ON Sales.OrderDetails.orderid = Sales.Orders.orderid
+	AND Sales.OrderDetails.orderid = Sales.Orders.orderid
+WHERE dbo.findCost(Production.Products.unitprice, Sales.OrderDetails.unitprice) = 0
+	AND (Sales.OrderDetails.qty * Sales.Orders.freight) < 2000
+ORDER BY CostDifference
+	,shippingWeight DESC
+
+--7
+USE TSQLV4
+GO
+
+DROP FUNCTION
+
+IF EXISTS dbo.findCost;
+GO
+CREATE FUNCTION dbo.findCost (
+	@wholesalePrice MONEY
+	,@MSRP MONEY
+	)
+RETURNS MONEY
+AS
+BEGIN
+	RETURN @wholesalePrice - @MSRP
+END
+GO
+
+
+
+
+SELECT Production.Products.productid
+	,Sales.OrderDetails.orderid
+	,Production.Products.unitprice AS OrderedPrice
+	,Sales.OrderDetails.unitprice AS SoldPrice
+	,dbo.findCost(Production.Products.unitprice, Sales.OrderDetails.unitprice) AS CostDifference
+	,((Sales.OrderDetails.qty * Sales.Orders.freight) / 24910) AS numberOfContainers
+FROM Production.Products
+INNER JOIN Sales.OrderDetails ON Production.Products.productid = Sales.OrderDetails.productid
+	AND Production.Products.productid = Sales.OrderDetails.productid
+INNER JOIN Sales.Orders ON Sales.OrderDetails.orderid = Sales.Orders.orderid
+	AND Sales.OrderDetails.orderid = Sales.Orders.orderid
+WHERE dbo.findCost(Production.Products.unitprice, Sales.OrderDetails.unitprice) = 0
+	AND ((Sales.OrderDetails.qty * Sales.Orders.freight) / 24910) > 2
