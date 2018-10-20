@@ -3,24 +3,18 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-public class ConnectMSSQLServer
+public class Query1
 {
    public void dbConnect(
-		   //String url
+		   String url
 
-		   String db_connect_string,
-           String db_userid,
-           String db_password
            )
    {
       try {
          Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-         //Connection conn = DriverManager.getConnection(url);
-         Connection conn = DriverManager.getConnection(db_connect_string,
-                  db_userid, db_password);
-         System.out.println("connected");
+         Connection conn = DriverManager.getConnection(url);
          Statement statement = conn.createStatement();
-         String queryString = "select * from sysobjects where type='u'";
+         String queryString = "select orderid from Sales.Orders where orderid % 2 = 0";
          ResultSet rs = statement.executeQuery(queryString);
          while (rs.next()) {
             System.out.println(rs.getString(1));
@@ -32,9 +26,7 @@ public class ConnectMSSQLServer
 
    public static void main(String[] args)
    {
-      ConnectMSSQLServer connServer = new ConnectMSSQLServer();
-      //connServer.dbConnect("jdbc:sqlserver://DESKTOP-QNE5J2D\\PLIN\\PLIN;integratedSecurity=true");
-      connServer.dbConnect("jdbc:sqlserver://occam.cs.qc.cuny.edu,21433", "student",
-               "dbclass331");
+	   Query1 connServer = new Query1();
+      connServer.dbConnect("jdbc:sqlserver://ASUS-UX303\\PLIN;databaseName=TSQLV4;integratedSecurity=true");
    }
 }
