@@ -3,7 +3,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-public class Query1
+public class ConnectMSSQLServer
 {
    public void dbConnect(
 		   String url
